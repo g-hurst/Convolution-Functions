@@ -8,6 +8,7 @@ typedef struct _Layer {
 } Layer;
 
 Layer* make_layer(int, int, int);
-void destroy_layer(Layer*, int, int);
+Layer* make_convolution(Layer* input, Layer* kernel);
+void destroy_layer(Layer*);
 
 #endif
