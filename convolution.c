@@ -1,27 +1,46 @@
 #include <stdlib.h>
 
 #include "convolution.h"
+#include "logging.h"
 
 Layer* make_layer(int m, int n, int c){
-    Layer* layer = malloc(sizeof(*layer));
+    if( !m || !n || !c ) {
+        return NULL;
+    }
+
+    Layer* layer = calloc(1, sizeof(*layer));
     *layer = (Layer) { .m=m, .n=n, .c=c, .weights=NULL };
-    layer->weights = calloc(m, sizeof(float));
+    
+    // creates a 3d matrix of zeros size (m, n, c)
+    float*** weights = calloc(m, sizeof(*weights));
     for(int i=0; i < m; i++){
-        layer->weights[m] = calloc(n, sizeof(float));
+        weights[i] = calloc(n, sizeof(**weights));
         for(int j = 0; j < n; j++){
-            layer->weights[m][n] = calloc(c, sizeof(float));
+            weights[i][j] = malloc(c * sizeof(***weights));
             for(int k = 0; k < c; k++){
-                layer->weights[m][n][k] = 0;
+                weights[i][j][k] = 0;
             }
         }
     }
+    
+    layer->weights = weights;
+    return layer;
+}
+
+Layer* make_convolution(Layer* input, Layer* kernel){ 
+    Layer* output = make_layer(input->m - kernel->m + 1, 
+                               input->n - kernel->n + 1,
+                               input->c);
+    return output;
 
 }
 
-void destroy_layer(Layer *layer, int m, int n, int c){
+void destroy_layer(Layer *layer, int m, int n){
     /*
     Takes a layer and frees all the mem required for it
     */
+    if( !layer ) return;
+
     for (int i = 0; i < m; i++){
         for (int j = 0; j < n; j++){
             free(layer->weights[i][j]);
@@ -29,4 +48,5 @@ void destroy_layer(Layer *layer, int m, int n, int c){
         free(layer->weights[i]);
     }
     free(layer->weights);
+    free(layer);
 }

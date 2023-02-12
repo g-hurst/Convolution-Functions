@@ -42,26 +42,20 @@
             }                                                   \
             DBG_PRINTF("%3d]\n", (dbg_arr)[(dbg_sz) - 1]);       \
         } while(false)
-        
-        #define DBG_PRINT_ARR_C(dbg_arr, dbg_sz)                \
-        do {                                                    \
-            DBG_PRINTF("[");                                    \
-            for(int dbg_i = 0; dbg_i < (dbg_sz) - 1; dbg_i++){  \
-                DBG_PRINTF("%3c, ", (dbg_arr)[dbg_i]);           \
-            }                                                   \
-            DBG_PRINTF("%3c]\n", (dbg_arr)[(dbg_sz) - 1]);       \
-        } while(false)
 
-        #define DBG_PRINT_GRID(dbg_grid)                             \
+        #define DBG_PRINT_LAYER(dbg_grid, dbg_c)                     \
         do {                                                         \
             for(int dbg_j = 0; dbg_j < (dbg_grid).m; dbg_j++){       \
-                DBG_PRINT_ARR((dbg_grid).grid[dbg_j], (dbg_grid).n); \
-            }                                                        \
+                DBG_PRINTF("[");                                    \
+                for(int dbg_i = 0; dbg_i < (dbg_grid).n; dbg_i++){        \
+                    DBG_PRINTF("%.4f, ", (dbg_grid).weights[dbg_j][dbg_i][dbg_c]); \
+                }                                                         \
+                DBG_PRINTF("%.4f]\n", (dbg_grid).weights[dbg_j][(dbg_grid).n - 1][dbg_c]);       \
+            }                                                             \
         } while(false)
     #else
         #define DBG_PRINTF(...)
         #define DBG_PRINT_ARR(dbg_arr, dbg_sz)
-        #define DBG_PRINT_ARR_C(dbg_arr, dbg_sz)
-        #define DBG_PRINT_GRID(dbg_grid)
+        #define DBG_PRINT_LAYER(dbg_grid)
     #endif
 #endif

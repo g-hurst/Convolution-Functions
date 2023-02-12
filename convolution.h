@@ -7,7 +7,7 @@ typedef struct _Layer {
  
 } Layer;
 
-Layer* make_layer(int m, int n, int c);
-void destroy_layer(Layer *layer, int m, int n, int c);
+Layer* make_layer(int, int, int);
+void destroy_layer(Layer*, int, int);
 
 #endif
