@@ -1,0 +1,9 @@
+Psudo code for convolution:
+
+
+inputs:
+- layet to be convoluted (length, width)
+- convoluiton size (length, width)
+
+output: 
+- convolution of image
