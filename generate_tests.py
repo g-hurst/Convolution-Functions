@@ -31,7 +31,9 @@ generations = [{'fname':'test_0.json', 'm_size':(5,5), 'k_size':(2,2)},
                {'fname':'test_5.json', 'm_size':(1024,768), 'k_size':(15,15)} ]
 
 if __name__ == '__main__':
-    key_dir = './keys'
+    key_dir = 'keys'
+    if key_dir not in os.listdir('./'):
+        os.mkdir(key_dir)
     key_files = os.listdir(key_dir)
     
     for gen in generations:

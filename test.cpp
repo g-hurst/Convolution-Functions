@@ -12,6 +12,9 @@
 static bool run_test(const char* f_name);
 
 int main(){
+    system("python3 generate_tests.py"); // runs the py file to generate the test cases
+
+    // test cases
     const char* f_names[TOTAL_TESTS] = {"keys/test_0.json", "keys/test_1.json", "keys/test_2.json",
                                         "keys/test_3.json", "keys/test_4.json", "keys/test_5.json"};
 
