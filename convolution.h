@@ -3,7 +3,7 @@
 
 typedef struct _Layer {
  int m, n, c;
- float*** weights;
+ double*** weights;
  
 } Layer;
 

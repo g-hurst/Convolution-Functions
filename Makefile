@@ -9,7 +9,7 @@ EXECUTABLE       =$(BASE_NAME)
 EXECUTABLE_GCOV  =$(EXECUTABLE)_gcov
 # 
 # SOURCE FILENAMES
-MAIN_C =test.c 
+MAIN_C =test.cpp -ljsoncpp
 SRC_C  =convolution.c 
 SRC_H  =convolution.h 
 #
@@ -18,9 +18,9 @@ RM_FILES =test_outs/*
 # 
 # SYSTEM
 SHELL           =/bin/bash
-CC              =gcc
-CFLAGS          =-g -std=c99 -Wall -Wshadow -Wvla -Werror -pedantic -D DEBUGGING
-DBG_FLAGS       =-g -std=c99 -D DEBUGGING
+CC              =g++
+CFLAGS          =-g -std=c++2a -Wall -Wshadow -Wvla -Werror
+DBG_FLAGS       =-g std=c++2a -D DEBUGGING
 CFLAGS_GCOV     =$(DBG_FLAGS) -fprofile-arcs -ftest-coverage
 MEM_FLAGS       =--leak-check=full  --show-leak-kinds=all --track-origins=yes --verbose
 OUT				=echo -e -n
@@ -28,7 +28,7 @@ OUT				=echo -e -n
 # RULES
 #
 $(EXECUTABLE): $(SRC_C) $(MAIN_C) $(SRC_H)
-	$(CC) $(DBG_FLAGS) -o $(EXECUTABLE) $(MAIN_C) $(SRC_C) 
+	$(CC) $(CFLAGS) -o $(EXECUTABLE) $(MAIN_C) $(SRC_C) 
 	$(OUT) "executable: \"$(EXECUTABLE)\" was sucessfully created\n"
 
 # fill the rest of the args later

@@ -9,7 +9,9 @@
     #define MAX(a,b) ((a) > (b) ? a : b)
 
     //_______________________________LOGGING_TOOLS__________________________
-    #define ANSI_RED   "\x1b[31m" 
+    #define ANSI_RED   "\x1b[31m"
+    #define ANSI_GREEN "\x1b[32m"
+    #define ANSI_BLUE  "\x1b[34m"
     #define ANSI_RESET "\x1b[0m"
     #define LOG_OUT stderr
     #define safe_write(sf_ptr, sf_sz, sf_num, sf_fp)           \
@@ -20,16 +22,20 @@
 
     #define LOG_IS_FILE_OUT isatty(STDOUT_FILENO) 
     #define _LOG_OUT(...) fprintf(LOG_OUT, __VA_ARGS__)
-    #define LOG_ERR(...)                            \
-            do{                                     \
-                if (LOG_IS_FILE_OUT) {              \
-                    _LOG_OUT(ANSI_RED __VA_ARGS__); \
+    #define _LOG_COL(log_col, ...)                     \
+            do{                                      \
+                if (LOG_IS_FILE_OUT) {               \
+                    _LOG_OUT(log_col __VA_ARGS__);\
                     _LOG_OUT(ANSI_RESET);	        \
                 }                                   \
                 else{                               \
                     _LOG_OUT(__VA_ARGS__);          \
                 }                                   \
             }while(false)
+    #define LOG_ERR(...)   _LOG_COL(ANSI_RED, __VA_ARGS__)
+    #define LOG_RED(...)   _LOG_COL(ANSI_RED, __VA_ARGS__)
+    #define LOG_GREEN(...) _LOG_COL(ANSI_GREEN, __VA_ARGS__)
+    #define LOG_BLUE(...)  _LOG_COL(ANSI_BLUE, __VA_ARGS__)
 
     //_______________________________DEBUGGING__________________________
     #ifdef DEBUGGING
@@ -50,12 +56,12 @@
                 for(int dbg_i = 0; dbg_i < (dbg_grid).n - 1; dbg_i++){        \
                     DBG_PRINTF("%6.3f, ", (dbg_grid).weights[dbg_j][dbg_i][dbg_c]); \
                 }                                                         \
-                DBG_PRINTF("%6.3f]\n", (dbg_grid).weights[dbg_j][(dbg_grid).n - 1][dbg_c]);       \
+                DBG_PRINTF("%8.3f]\n", (dbg_grid).weights[dbg_j][(dbg_grid).n - 1][dbg_c]);       \
             }                                                             \
         } while(false)
     #else
         #define DBG_PRINTF(...)
         #define DBG_PRINT_ARR(dbg_arr, dbg_sz)
-        #define DBG_PRINT_LAYER(dbg_grid)
+        #define DBG_PRINT_LAYER(dbg_grid, dbg_c)
     #endif
 #endif

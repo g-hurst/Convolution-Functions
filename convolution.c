@@ -8,15 +8,15 @@ Layer* make_layer(int m, int n, int c){
         return NULL;
     }
 
-    Layer* layer = calloc(1, sizeof(*layer));
+    Layer* layer = (Layer*) calloc(1, sizeof(*layer));
     *layer = (Layer) { .m=m, .n=n, .c=c, .weights=NULL };
     
     // creates a 3d matrix of zeros size (m, n, c)
-    float*** weights = calloc(m, sizeof(*weights));
+    double*** weights = (double***) calloc(m, sizeof(*weights));
     for(int i=0; i < m; i++){
-        weights[i] = calloc(n, sizeof(**weights));
+        weights[i] = (double**) calloc(n, sizeof(**weights));
         for(int j = 0; j < n; j++){
-            weights[i][j] = malloc(c * sizeof(***weights));
+            weights[i][j] = (double*) malloc(c * sizeof(***weights));
             for(int k = 0; k < c; k++){
                 weights[i][j][k] = 0;
             }
@@ -27,8 +27,8 @@ Layer* make_layer(int m, int n, int c){
     return layer;
 }
 
-static float dot_2d(Layer input, Layer kernel, int c, int offset_1, int offset_2) {
-    float product = 0;
+static double dot_2d(Layer input, Layer kernel, int c, int offset_1, int offset_2) {
+    double product = 0;
     for (int i = 0; i < kernel.m; i++) {
         for(int j = 0; j < kernel.n; j++) {
             product += input.weights[i + offset_1][j + offset_2][c] * kernel.weights[i][j][c];
