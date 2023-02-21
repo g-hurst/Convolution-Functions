@@ -10,6 +10,8 @@
 #define TESTS_2D 6
 #define TESTS_3D 6
 
+#define MAX_ERR 0.01 // value for the max error between any expected and calcualted convolution value
+
 static bool run_test(const char* f_name);
 
 int main(){
@@ -40,14 +42,16 @@ int main(){
             LOG_RED("Test %02d Failed: %s\n", i, f_names_3d[i]);
         }
     }
+
     return 0;
 }
 
 static Layer* json_to_layer(Json::Value mat){
+    int c = mat["shape"][0].asInt();
     int m = mat["shape"][1].asInt();
     int n = mat["shape"][2].asInt();
-    int c = mat["shape"][0].asInt();
 
+    // write each value fron the JSON obj to the Layer struct
     Layer* layer = make_layer(m, n, c);
     for(int chan = 0; chan < c; chan++){
         for(int i = 0; i < m; i++) {
@@ -60,16 +64,19 @@ static Layer* json_to_layer(Json::Value mat){
 }
 
 static bool run_test(const char* f_name){
+    // reads JSON file and stores it
     Json::Value data;
     std::ifstream data_file(f_name, std::ifstream::binary);
     data_file >> data;   
-    
-    bool is_same = true;
+    data_file.close();
+
+    // read from JSON and convert to layer structure
     Layer* ker = json_to_layer(data["kernel"]);
     Layer* mat = json_to_layer(data["matrix"]);
     Layer* conv_key  = json_to_layer(data["convolution"]);
     Layer* conv_calc = make_convolution(mat, ker);
     
+    // output for debugging when -D DEBUGGING is compiled
     DBG_PRINT_LAYER(*mat, 1);
     DBG_PRINTF("\n");
     DBG_PRINT_LAYER(*ker, 0);
@@ -80,15 +87,19 @@ static bool run_test(const char* f_name){
     DBG_PRINT_LAYER(*conv_calc, 1);
     DBG_PRINT_LAYER(*conv_calc, 2);
 
+    // finds the % difference between all the expected and calculated values
+    // if any of them are > MAX_ERR, function reutrns false
+    bool is_same = true;
     for(int chan = 0; chan < conv_key->c; chan++){
         for(int i = 0; i < conv_key->m; i++){
             for(int j = 0; j < conv_key->n; j++){
                 double diff = fabs(conv_key->weights[i][j][chan] - conv_calc->weights[i][j][chan]) / fabs(conv_key->weights[i][j][chan]);
-                is_same &= (diff < 0.01);
+                is_same &= (diff < MAX_ERR);
             }
         }
     }
     
+    // mem cleanup
     destroy_layer(ker);
     destroy_layer(mat);
     destroy_layer(conv_key);
