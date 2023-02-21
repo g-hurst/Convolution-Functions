@@ -31,7 +31,7 @@ static double dot_2d(Layer input, Layer kernel, int c, int offset_1, int offset_
     double product = 0;
     for (int i = 0; i < kernel.m; i++) {
         for(int j = 0; j < kernel.n; j++) {
-            product += input.weights[i + offset_1][j + offset_2][c] * kernel.weights[i][j][c];
+            product += input.weights[i + offset_1][j + offset_2][c] * kernel.weights[i][j][0];
         }
     }
     return product;
@@ -41,6 +41,7 @@ Layer* make_convolution(Layer* input, Layer* kernel){
     /*
     takes an input layer and a kernel and then convolutes it 
     into a output layer. 
+    NOTE: this assumes the kernal to only have one channel
     */
     Layer* output = make_layer(input->m - kernel->m + 1, 
                                input->n - kernel->n + 1,

@@ -16,7 +16,7 @@ int main(){
     system("python3 generate_tests.py"); // runs the py file to generate the test cases
 
     // test cases for 2d convolution
-    const char* f_names_2d[TESTS_2D] = {"keys/test_0.json", "keys/test_1.json", "keys/test_2.json",
+    const char* f_names_2d[] = {"keys/test_0.json", "keys/test_1.json", "keys/test_2.json",
                                         "keys/test_3.json", "keys/test_4.json", "keys/test_5.json"};
     LOG_BLUE("Running test cases for 2d convolution: \n");
     for (int i = 0; i < TESTS_2D; i++) {
@@ -30,7 +30,7 @@ int main(){
 
     // test cases for 3d convolution
     LOG_BLUE("Running test cases for 3d convolution (3 channel input): \n");
-    const char* f_names_3d[TESTS_3D] = {"keys/test_6.json", "keys/test_7.json", "keys/test_8.json",
+    const char* f_names_3d[] = {"keys/test_6.json", "keys/test_7.json", "keys/test_8.json",
                                         "keys/test_9.json", "keys/test_10.json", "keys/test_11.json"};
     for (int i = 0; i < TESTS_3D; i++) {
         if( run_test(f_names_3d[i])) {
@@ -43,13 +43,17 @@ int main(){
     return 0;
 }
 
-static Layer* json_to_layer(Json::Value mat, int channel){
+static Layer* json_to_layer(Json::Value mat){
     int m = mat["shape"][1].asInt();
     int n = mat["shape"][2].asInt();
-    Layer* layer = make_layer(m, n, 1);
-    for(int i = 0; i < m; i++) {
-        for(int j = 0; j < n; j++) {
-            layer->weights[i][j][0] = mat["data"][channel][i][j].asDouble();
+    int c = mat["shape"][0].asInt();
+
+    Layer* layer = make_layer(m, n, c);
+    for(int chan = 0; chan < c; chan++){
+        for(int i = 0; i < m; i++) {
+            for(int j = 0; j < n; j++) {
+                layer->weights[i][j][chan] = mat["data"][chan][i][j].asDouble();
+            }
         }
     }
     return layer;
@@ -61,34 +65,34 @@ static bool run_test(const char* f_name){
     data_file >> data;   
     
     bool is_same = true;
-    int channels = data["matrix"]["shape"][0].asInt();
-    Layer* ker = json_to_layer(data["kernel"], 0);
+    Layer* ker = json_to_layer(data["kernel"]);
+    Layer* mat = json_to_layer(data["matrix"]);
+    Layer* conv_key  = json_to_layer(data["convolution"]);
+    Layer* conv_calc = make_convolution(mat, ker);
+    
+    DBG_PRINT_LAYER(*mat, 1);
+    DBG_PRINTF("\n");
+    DBG_PRINT_LAYER(*ker, 0);
+    DBG_PRINTF("\nkey convolution: \n");
+    DBG_PRINT_LAYER(*conv_key, 1);
+    DBG_PRINTF("calculated convolution: \n");
+    DBG_PRINT_LAYER(*conv_calc, 0);
+    DBG_PRINT_LAYER(*conv_calc, 1);
+    DBG_PRINT_LAYER(*conv_calc, 2);
 
-    for(int chan = 0; chan < channels; chan++) {
-        Layer* mat = json_to_layer(data["matrix"], chan);
-        Layer* conv_key  = json_to_layer(data["convolution"], chan);
-        Layer* conv_calc = make_convolution(mat, ker);
-        
-        DBG_PRINT_LAYER(*mat, 0);
-        DBG_PRINTF("\n");
-        DBG_PRINT_LAYER(*ker, 0);
-        DBG_PRINTF("\nkey convolution: \n");
-        DBG_PRINT_LAYER(*conv_key, 0);
-        DBG_PRINTF("calculated convolution: \n");
-        DBG_PRINT_LAYER(*conv_calc, 0);
-
+    for(int chan = 0; chan < conv_key->c; chan++){
         for(int i = 0; i < conv_key->m; i++){
             for(int j = 0; j < conv_key->n; j++){
-                double diff = fabs(conv_key->weights[i][j][0] - conv_calc->weights[i][j][0]) / fabs(conv_key->weights[i][j][0]);
+                double diff = fabs(conv_key->weights[i][j][chan] - conv_calc->weights[i][j][chan]) / fabs(conv_key->weights[i][j][chan]);
                 is_same &= (diff < 0.01);
             }
         }
-
-        destroy_layer(mat);
-        destroy_layer(conv_key);
-        destroy_layer(conv_calc);
     }
+    
     destroy_layer(ker);
+    destroy_layer(mat);
+    destroy_layer(conv_key);
+    destroy_layer(conv_calc);
 
     return is_same;
 }
