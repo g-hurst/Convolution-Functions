@@ -90,9 +90,9 @@ static bool run_test(const char* f_name){
     // finds the % difference between all the expected and calculated values
     // if any of them are > MAX_ERR, function reutrns false
     bool is_same = true;
-    for(int chan = 0; chan < conv_key->c; chan++){
-        for(int i = 0; i < conv_key->m; i++){
-            for(int j = 0; j < conv_key->n; j++){
+    for(int chan = 0; is_same && chan < conv_key->c; chan++){
+        for(int i = 0; is_same && i < conv_key->m; i++){
+            for(int j = 0; is_same && j < conv_key->n; j++){
                 double diff = fabs(conv_key->weights[i][j][chan] - conv_calc->weights[i][j][chan]) / fabs(conv_key->weights[i][j][chan]);
                 is_same &= (diff < MAX_ERR);
             }
