@@ -37,7 +37,7 @@ static double dot_2d(Layer input, Layer kernel, int c, int offset_1, int offset_
     return product;
 }
 
-Layer* make_convolution(Layer* input, Layer* kernel){ 
+void make_convolution(Layer* input, Layer* kernel, Layer** final_out){ 
     /*
     takes an input layer and a kernel and then convolutes it 
     into a output layer. 
@@ -54,8 +54,7 @@ Layer* make_convolution(Layer* input, Layer* kernel){
             }
         }
     }
-    return output;
-
+    *final_out =  output;
 }
 
 void destroy_layer(Layer *layer){

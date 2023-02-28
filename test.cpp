@@ -74,7 +74,9 @@ static bool run_test(const char* f_name){
     Layer* ker = json_to_layer(data["kernel"]);
     Layer* mat = json_to_layer(data["matrix"]);
     Layer* conv_key  = json_to_layer(data["convolution"]);
-    Layer* conv_calc = make_convolution(mat, ker);
+    Layer* conv_calc;
+    
+    make_convolution(mat, ker, &conv_calc);
     
     // output for debugging when -D DEBUGGING is compiled
     DBG_PRINT_LAYER(*mat, 1);
