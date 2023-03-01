@@ -27,11 +27,11 @@ Layer* make_layer(int m, int n, int c){
     return layer;
 }
 
-static double dot_2d(Layer input, Layer kernel, int c, int offset_1, int offset_2) {
+static double dot_2d(Layer* input, Layer* kernel, int c, int offset_1, int offset_2) {
     double product = 0;
-    for (int i = 0; i < kernel.m; i++) {
-        for(int j = 0; j < kernel.n; j++) {
-            product += input.weights[i + offset_1][j + offset_2][c] * kernel.weights[i][j][0];
+    for (int i = 0; i < kernel->m; i++) {
+        for(int j = 0; j < kernel->n; j++) {
+            product += input->weights[i + offset_1][j + offset_2][c] * kernel->weights[i][j][0];
         }
     }
     return product;
@@ -50,7 +50,7 @@ void make_convolution(Layer* input, Layer* kernel, Layer** final_out){
     for(int i = 0; i < output->m; i++){
         for(int j = 0; j < output->n; j++) {
             for(int k = 0; k < output->c; k++) {
-                output->weights[i][j][k] = dot_2d(*input, *kernel, k, i, j);
+                output->weights[i][j][k] = dot_2d(input, kernel, k, i, j);
             }
         }
     }
