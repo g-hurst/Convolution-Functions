@@ -19,7 +19,7 @@ RM_FILES =test_outs/*
 # SYSTEM
 SHELL           =/bin/bash
 CC              =g++
-CFLAGS          =-g -std=c++2a -Wall -Wshadow -Wvla -Werror # -D DEBUGGING
+CFLAGS          =-g -std=c++2a -Wall -Wshadow -Wvla -Werror #  -D DEBUGGING
 DBG_FLAGS       =-g std=c++2a -D DEBUGGING
 CFLAGS_GCOV     =$(DBG_FLAGS) -fprofile-arcs -ftest-coverage
 MEM_FLAGS       =--leak-check=full  --show-leak-kinds=all --track-origins=yes --verbose
@@ -49,5 +49,5 @@ coverage: $(SRC_C) $(MAIN_C) $(SRC_H)
 	gcov -f $(SRC_C)
 
 .PHONY:  clean clean_crash coverage grind grind_test editc
-.SILENT: clean clean_crash coverage grind grind_test editc  $(EXECUTABLE) 
+.SILENT: clean clean_crash coverage grind grind_test editc # $(EXECUTABLE) 
 # vim set noexpandtab tabstop=4 filetype=make:

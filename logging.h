@@ -51,12 +51,12 @@
 
         #define DBG_PRINT_LAYER(dbg_grid, dbg_c)                     \
         do {                                                         \
-            for(int dbg_j = 0; dbg_j < (dbg_grid).m; dbg_j++){       \
+            for(int dbg_j = 0; dbg_j < (dbg_grid)->m; dbg_j++){       \
                 DBG_PRINTF("[");                                    \
-                for(int dbg_i = 0; dbg_i < (dbg_grid).n - 1; dbg_i++){        \
-                    DBG_PRINTF("%6.3f, ", (dbg_grid).weights[dbg_j][dbg_i][dbg_c]); \
+                for(int dbg_i = 0; dbg_i < (dbg_grid)->n - 1; dbg_i++){        \
+                    DBG_PRINTF("%6.3f, ", get_weight(dbg_grid, dbg_c, dbg_j, dbg_i)); \
                 }                                                         \
-                DBG_PRINTF("%8.3f]\n", (dbg_grid).weights[dbg_j][(dbg_grid).n - 1][dbg_c]);       \
+                DBG_PRINTF("%8.3f]\n", get_weight(dbg_grid, dbg_c, dbg_j, (dbg_grid)->n - 1));       \
             }                                                             \
         } while(false)
     #else
