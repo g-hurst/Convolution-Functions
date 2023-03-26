@@ -45,7 +45,9 @@ def write_test_maxpool(f_name, mat, pool_size, stride):
     
     
     output = pool(mat).numpy()
-    output = np.reshape(output, [og_shape[0], 6, 6]) # this is bad currently but temporary
+    output = np.reshape(output, [og_shape[0], 
+                                 (og_shape[1] - pool_size[0]) // stride + 1, 
+                                 (og_shape[2] - pool_size[1]) // stride + 1]) # this is bad currently but temporary
     mat = mat.numpy()
     mat = np.reshape(mat, og_shape)
     # print(mat)
@@ -69,7 +71,8 @@ generations_conv = [{'fname':'test_0.json', 'm_size':(1,5,5), 'k_size':(1,2,2)},
                     {'fname':'test_11.json', 'm_size':(3,1024,768), 'k_size':(1,15,15)}]
 
 generations_maxpool = [{'fname':'test_maxpool_0.json', 'm_size':(1,13,13),   'w_size':(3,3), 'stride':2},
-                       {'fname':'test_maxpool_1.json', 'm_size':(256,13,13), 'w_size':(3,3), 'stride':2}]
+                       {'fname':'test_maxpool_alexnet_3.json', 'm_size':(256,13,13), 'w_size':(3,3), 'stride':2},
+                       {'fname':'test_maxpool_alexnet_1.json', 'm_size':(96,55,55), 'w_size':(3,3), 'stride':2}]
 
 
 if __name__ == '__main__':

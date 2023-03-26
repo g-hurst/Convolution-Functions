@@ -9,7 +9,7 @@
 
 #define TESTS_2D 6
 #define TESTS_3D 6
-#define TESTS_MAXPOOL 2
+#define TESTS_MAXPOOL 3
 
 #define MAX_ERR 0.01 // value for the max error between any expected and calcualted convolution value
 
@@ -47,7 +47,7 @@ int main(){
 
     // test cases for max pooling
     LOG_BLUE("Running test cases for max pooling: \n");
-    const char* f_names_maxpool[] = {"keys/test_maxpool_0.json", "keys/test_maxpool_1.json"};
+    const char* f_names_maxpool[] = {"keys/test_maxpool_0.json", "keys/test_maxpool_alexnet_1.json", "keys/test_maxpool_alexnet_3.json"};
 
     for (int i = 0; i < TESTS_MAXPOOL; i++) {
         if( run_test_maxpool(f_names_maxpool[i])) {
