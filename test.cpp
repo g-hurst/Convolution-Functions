@@ -9,10 +9,12 @@
 
 #define TESTS_2D 6
 #define TESTS_3D 6
+#define TESTS_MAXPOOL 2
 
 #define MAX_ERR 0.01 // value for the max error between any expected and calcualted convolution value
 
-static bool run_test(const char* f_name);
+static bool run_test_conv(const char* f_name);
+static bool run_test_maxpool(const char* f_name);
 
 int main(){
     system("python3 generate_tests.py"); // runs the py file to generate the test cases
@@ -22,7 +24,7 @@ int main(){
                                         "keys/test_3.json", "keys/test_4.json", "keys/test_5.json"};
     LOG_BLUE("Running test cases for 2d convolution: \n");
     for (int i = 0; i < TESTS_2D; i++) {
-        if( run_test(f_names_2d[i])) {
+        if( run_test_conv(f_names_2d[i])) {
             LOG_GREEN("Test %02d Passed: %s\n", i, f_names_2d[i]);
         }
         else{
@@ -35,11 +37,24 @@ int main(){
     const char* f_names_3d[] = {"keys/test_6.json", "keys/test_7.json", "keys/test_8.json",
                                         "keys/test_9.json", "keys/test_10.json", "keys/test_11.json"};
     for (int i = 0; i < TESTS_3D; i++) {
-        if( run_test(f_names_3d[i])) {
+        if( run_test_conv(f_names_3d[i])) {
             LOG_GREEN("Test %02d Passed: %s\n", i, f_names_3d[i]);
         }
         else{
             LOG_RED("Test %02d Failed: %s\n", i, f_names_3d[i]);
+        }
+    }
+
+    // test cases for max pooling
+    LOG_BLUE("Running test cases for max pooling: \n");
+    const char* f_names_maxpool[] = {"keys/test_maxpool_0.json", "keys/test_maxpool_1.json"};
+
+    for (int i = 0; i < TESTS_MAXPOOL; i++) {
+        if( run_test_maxpool(f_names_maxpool[i])) {
+            LOG_GREEN("Test %02d Passed: %s\n", i, f_names_maxpool[i]);
+        }
+        else{
+            LOG_RED("Test %02d Failed: %s\n", i, f_names_maxpool[i]);
         }
     }
 
@@ -65,7 +80,60 @@ static Layer* json_to_layer(Json::Value mat){
     return layer;
 }
 
-static bool run_test(const char* f_name){
+static bool run_test_maxpool(const char* f_name){
+    // reads JSON file and stores it
+    Json::Value data;
+    std::ifstream data_file(f_name, std::ifstream::binary);
+    data_file >> data;   
+    data_file.close();
+    // {'matrix':{'shape':mat.shape, 'data':mat}, 'pool':{'shape':pool_size, 'stride':stride}, 'output':{'shape':output.shape, 'data':output}}
+    // read from JSON and convert to layer structure
+    Layer* mat = json_to_layer(data["matrix"]);
+    DBG_PRINT_LAYER(mat, 0);
+
+    int window_size_m = data["pool"]["shape"][0].asInt();
+    int window_size_n = data["pool"]["shape"][0].asInt();
+    int stride        = data["pool"]["stride"].asInt();
+
+    Layer* pool_key  = json_to_layer(data["output"]);
+    Layer* pool_calc;
+    
+    make_max_pooling(mat, window_size_m, window_size_n, stride, &pool_calc);
+    
+    // output for debugging when -D DEBUGGING is compiled
+    
+    DBG_PRINTF("\n");
+    DBG_PRINTF("\nkey pool: \n");
+    DBG_PRINT_LAYER(pool_key, 0);
+    DBG_PRINTF("calculated pool: \n");
+    DBG_PRINT_LAYER(pool_calc, 0);
+    // DBG_PRINT_LAYER(pool_calc, 1);
+    // DBG_PRINT_LAYER(pool_calc, 2);
+
+    // finds the % difference between all the expected and calculated values
+    // if any of them are > MAX_ERR, function reutrns false
+    bool is_same = true;
+    for(int chan = 0; is_same && chan < pool_key->c; chan++){
+        for(int i = 0; is_same && i < pool_key->m; i++){
+            for(int j = 0; is_same && j < pool_key->n; j++){
+                // double diff = fabs(pool_key->weights[i][j][chan] - pool_calc->weights[i][j][chan]) / fabs(pool_key->weights[i][j][chan]);
+                double w1 = get_weight(pool_key, chan, i, j);
+                double w2 = get_weight(pool_calc, chan, i, j);
+                double diff = fabs(w1 - w2) / fabs(w1);
+                is_same &= (diff < MAX_ERR);
+            }
+        }
+    }
+    
+    // mem cleanup
+    destroy_layer(mat);
+    destroy_layer(pool_key);
+    destroy_layer(pool_calc);
+
+    return is_same;
+}
+
+static bool run_test_conv(const char* f_name){
     // reads JSON file and stores it
     Json::Value data;
     std::ifstream data_file(f_name, std::ifstream::binary);
@@ -88,11 +156,11 @@ static bool run_test(const char* f_name){
     
     DBG_PRINTF("\n");
     DBG_PRINTF("\nkey convolution: \n");
-    DBG_PRINT_LAYER(conv_key, 1);
+    DBG_PRINT_LAYER(conv_key, 0);
     DBG_PRINTF("calculated convolution: \n");
     DBG_PRINT_LAYER(conv_calc, 0);
-    DBG_PRINT_LAYER(conv_calc, 1);
-    DBG_PRINT_LAYER(conv_calc, 2);
+    // DBG_PRINT_LAYER(conv_calc, 1);
+    // DBG_PRINT_LAYER(conv_calc, 2);
 
     // finds the % difference between all the expected and calculated values
     // if any of them are > MAX_ERR, function reutrns false
