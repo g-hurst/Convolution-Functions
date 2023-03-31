@@ -8,12 +8,12 @@
 #include "logging.h"
 
 #define TESTS_2D 6
-#define TESTS_3D 6
-#define TESTS_MAXPOOL 3
+#define TESTS_3D 7
+#define TESTS_MAXPOOL 2
 
 #define MAX_ERR 0.01 // value for the max error between any expected and calcualted convolution value
 
-static bool run_test_conv(const char* f_name);
+static bool run_test_conv(const char* f_name, const int padding);
 static bool run_test_maxpool(const char* f_name);
 
 int main(){
@@ -24,7 +24,7 @@ int main(){
                                         "keys/test_3.json", "keys/test_4.json", "keys/test_5.json"};
     LOG_BLUE("Running test cases for 2d convolution: \n");
     for (int i = 0; i < TESTS_2D; i++) {
-        if( run_test_conv(f_names_2d[i])) {
+        if( run_test_conv(f_names_2d[i], 0)) {
             LOG_GREEN("Test %02d Passed: %s\n", i, f_names_2d[i]);
         }
         else{
@@ -33,11 +33,13 @@ int main(){
     }
 
     // test cases for 3d convolution
-    LOG_BLUE("Running test cases for 3d convolution (3 channel input): \n");
+    LOG_BLUE("Running test cases for 3d convolution: \n");
     const char* f_names_3d[] = {"keys/test_6.json", "keys/test_7.json", "keys/test_8.json",
-                                        "keys/test_9.json", "keys/test_10.json", "keys/test_11.json"};
+                                        "keys/test_9.json", "keys/test_10.json", "keys/test_11.json",
+                                        "keys/test_12.json"};
     for (int i = 0; i < TESTS_3D; i++) {
-        if( run_test_conv(f_names_3d[i])) {
+        bool success = (i < 6) ? run_test_conv(f_names_3d[i], 0) : run_test_conv(f_names_3d[i], 1);
+        if( success ) {
             LOG_GREEN("Test %02d Passed: %s\n", i, f_names_3d[i]);
         }
         else{
@@ -57,6 +59,7 @@ int main(){
             LOG_RED("Test %02d Failed: %s\n", i, f_names_maxpool[i]);
         }
     }
+
 
     return 0;
 }
@@ -133,7 +136,7 @@ static bool run_test_maxpool(const char* f_name){
     return is_same;
 }
 
-static bool run_test_conv(const char* f_name){
+static bool run_test_conv(const char* f_name, const int padding){
     // reads JSON file and stores it
     Json::Value data;
     std::ifstream data_file(f_name, std::ifstream::binary);
@@ -150,8 +153,8 @@ static bool run_test_conv(const char* f_name){
     Layer* conv_key  = json_to_layer(data["convolution"]);
     Layer* conv_calc;
     
-    make_convolution(mat, ker, &conv_calc);
-    
+    make_convolution(mat, ker, padding, &conv_calc);
+    // printf("input shape: (%d, %d, %d)\n output shape: (%d, %d. %d)\n", mat->m, mat->n, mat->c, conv_calc->m, conv_calc->n, conv_calc->c)
     // output for debugging when -D DEBUGGING is compiled
     
     DBG_PRINTF("\n");

@@ -5,12 +5,17 @@
 #include "logging.h"
 
 double get_weight(Layer* l, int c, int m, int n){
+    if(!l)  return 0;
+    int invalid = (m < 0 || n < 0 || c < 0) || (m > l->m || n > l->n || c > l->c);
+    if(invalid) return 0;
     return l->weights[(c * l->m * l->n) + (n * l->m) + m];
 }
 
 void set_weight(double val, Layer* l, int c, int m, int n) {
+    if(!l)  return;
+    int invalid = (m < 0 || n < 0 || c < 0) || (m > l->m || n > l->n || c > l->c);
+    if(invalid) return;
     l->weights[(c * l->m * l->n) + (n * l->m) + m] = val;
-    // printf("setting weight (%d, %d, %d): %d\n", c, m, n, (c * l->m * l->n) + (n * l->m) + m);
 }
 
 Layer* make_layer(int m, int n, int c){
@@ -35,11 +40,13 @@ Layer* make_layer(int m, int n, int c){
     return layer;
 }
 
-static double dot_2d(Layer* input, Layer* kernel, int c, int offset_1, int offset_2) {
+static double dot_3d(Layer* input, Layer* kernel, int offest_c, int offset_i, int offset_j) {
     double product = 0;
     for (int i = 0; i < kernel->m; i++) {
         for(int j = 0; j < kernel->n; j++) {
-            product += get_weight(input, c, i + offset_1, j + offset_2) * get_weight(kernel, 0, i, j);
+            for(int k = 0; k < kernel->c; k++) {
+                product += get_weight(input, k + offest_c, i + offset_i, j + offset_j) * get_weight(kernel, k, i, j);
+            }
         }
     }
     return product;
@@ -82,20 +89,20 @@ void make_max_pooling(Layer* input, int window_size_m, int window_size_n, int st
     *final_out =  output;
 }
 
-void make_convolution(Layer* input, Layer* kernel, Layer** final_out){ 
+void make_convolution(Layer* input, Layer* kernel, int padding, Layer** final_out){ 
     /*
     takes an input layer and a kernel and then convolutes it 
     into a output layer. 
     NOTE: this assumes the kernal to only have one channel
     */
-    Layer* output = make_layer(input->m - kernel->m + 1, 
-                               input->n - kernel->n + 1,
+    Layer* output = make_layer(input->m - kernel->m + 1 + 2 * padding, 
+                               input->n - kernel->n + 1 + 2 * padding,
                                input->c);
 
-    for(int i = 0; i < output->m; i++){
-        for(int j = 0; j < output->n; j++) {
-            for(int k = 0; k < output->c; k++) {
-                double dot = dot_2d(input, kernel, k, i, j);
+    for(int i = -padding; i < output->m + padding; i++){
+        for(int j = -padding; j < output->n + padding; j++) {
+            for(int k = -padding; k < output->c + padding; k++) {
+                double dot = dot_3d(input, kernel, k, i, j);
                 set_weight(dot, output, k, i, j);
             }
         }
