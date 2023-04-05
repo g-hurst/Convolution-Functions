@@ -8,20 +8,22 @@
 #include "logging.h"
 
 #define TESTS_2D 6
-#define TESTS_3D 7
+#define TESTS_3D 6
 #define TESTS_MAXPOOL 2
+#define TESTS_FULLCONN 2
 
 #define MAX_ERR 0.01 // value for the max error between any expected and calcualted convolution value
 
 static bool run_test_conv(const char* f_name, const int padding);
 static bool run_test_maxpool(const char* f_name);
+static bool run_test_fullconn(const char* f_name);
 
 int main(){
     system("python3 generate_tests.py"); // runs the py file to generate the test cases
 
     // test cases for 2d convolution
-    const char* f_names_2d[] = {"keys/test_0.json", "keys/test_1.json", "keys/test_2.json",
-                                        "keys/test_3.json", "keys/test_4.json", "keys/test_5.json"};
+    const char* f_names_2d[] = {"keys/test_conv_0.json", "keys/test_conv_1.json", "keys/test_conv_2.json",
+                                        "keys/test_conv_3.json", "keys/test_conv_4.json", "keys/test_conv_5.json"};
     LOG_BLUE("Running test cases for 2d convolution: \n");
     for (int i = 0; i < TESTS_2D; i++) {
         if( run_test_conv(f_names_2d[i], 0)) {
@@ -34,9 +36,8 @@ int main(){
 
     // test cases for 3d convolution
     LOG_BLUE("Running test cases for 3d convolution: \n");
-    const char* f_names_3d[] = {"keys/test_6.json", "keys/test_7.json", "keys/test_8.json",
-                                        "keys/test_9.json", "keys/test_10.json", "keys/test_11.json",
-                                        "keys/test_12.json"};
+    const char* f_names_3d[] = {"keys/test_conv3D_0.json", "keys/test_conv3D_1.json", "keys/test_conv3D_2.json",
+                                        "keys/test_conv3D_3.json", "keys/test_conv3D_4.json", "keys/test_conv3D_5.json"};
     for (int i = 0; i < TESTS_3D; i++) {
         bool success = (i < 6) ? run_test_conv(f_names_3d[i], 0) : run_test_conv(f_names_3d[i], 1);
         if( success ) {
@@ -60,6 +61,18 @@ int main(){
         }
     }
 
+    // test cases for fully connected layer
+    LOG_BLUE("Running test cases for fully connected: \n");
+    const char* f_names_fullconn[] = {"keys/test_fullconn_0.json", "keys/test_fullconn_1.json"};
+
+    for (int i = 0; i < TESTS_FULLCONN; i++) {
+        if( run_test_fullconn(f_names_fullconn[i])) {
+            LOG_GREEN("Test %02d Passed: %s\n", i, f_names_fullconn[i]);
+        }
+        else{
+            LOG_RED("Test %02d Failed: %s\n", i, f_names_fullconn[i]);
+        }
+    }
 
     return 0;
 }
@@ -83,13 +96,69 @@ static Layer* json_to_layer(Json::Value mat){
     return layer;
 }
 
+static bool is_valid_err(Layer* a, Layer* b, double err){
+    // finds the % difference between all the expected and calculated values
+    // if any of them are > MAX_ERR, function reutrns false
+    double w1, w2, diff;
+    bool is_same = (a->m == b->m) && (a->n == b->n) && (a->c == b->c);
+    for(int chan = 0; is_same && chan < a->c; chan++){
+        for(int i = 0; is_same && i < a->m; i++){
+            for(int j = 0; is_same && j < a->n; j++){
+                w1 = get_weight(a, chan, i, j);
+                w2 = get_weight(b, chan, i, j);
+                diff = fabs(w1 - w2) / fabs(w1);
+                is_same &= (diff < err);
+            }
+        }
+    }
+    return is_same;
+}
+
+static bool run_test_fullconn(const char* f_name){
+    // reads JSON file and stores it
+    Json::Value data;
+    std::ifstream data_file(f_name, std::ifstream::binary);
+    data_file >> data;   
+    data_file.close();
+
+    // read from JSON and convert to layer structure
+    Layer* mat = json_to_layer(data["matrix"]);
+    DBG_PRINT_LAYER(mat, 0);
+    DBG_PRINT_ARR(mat->weights, mat->m * mat->n * mat->c);
+
+    Layer* w_and_b = json_to_layer(data["w_and_b"]);
+    DBG_PRINT_LAYER(w_and_b, 0);
+
+    Layer* fullconn_key  = json_to_layer(data["output"]);
+    Layer* fullconn_calc;
+    
+    make_fully_connected(mat, w_and_b, &fullconn_calc);
+    
+    DBG_PRINTF("\n");
+    DBG_PRINTF("\nkey fully connected: \n");
+    DBG_PRINT_LAYER(fullconn_key, 0);
+    DBG_PRINTF("calculated fully connected: \n");
+    DBG_PRINT_LAYER(fullconn_calc, 0);
+
+    // calculate the error between the calculation and the key
+    bool is_same = is_valid_err(fullconn_key, fullconn_calc, MAX_ERR);
+    
+    // mem cleanup
+    destroy_layer(w_and_b);
+    destroy_layer(mat);
+    destroy_layer(fullconn_key);
+    destroy_layer(fullconn_calc);
+
+    return is_same;
+}
+
 static bool run_test_maxpool(const char* f_name){
     // reads JSON file and stores it
     Json::Value data;
     std::ifstream data_file(f_name, std::ifstream::binary);
     data_file >> data;   
     data_file.close();
-    // {'matrix':{'shape':mat.shape, 'data':mat}, 'pool':{'shape':pool_size, 'stride':stride}, 'output':{'shape':output.shape, 'data':output}}
+
     // read from JSON and convert to layer structure
     Layer* mat = json_to_layer(data["matrix"]);
     DBG_PRINT_LAYER(mat, 0);
@@ -103,30 +172,14 @@ static bool run_test_maxpool(const char* f_name){
     
     make_max_pooling(mat, window_size_m, window_size_n, stride, &pool_calc);
     
-    // output for debugging when -D DEBUGGING is compiled
-    
     DBG_PRINTF("\n");
     DBG_PRINTF("\nkey pool: \n");
     DBG_PRINT_LAYER(pool_key, 0);
     DBG_PRINTF("calculated pool: \n");
     DBG_PRINT_LAYER(pool_calc, 0);
-    // DBG_PRINT_LAYER(pool_calc, 1);
-    // DBG_PRINT_LAYER(pool_calc, 2);
 
-    // finds the % difference between all the expected and calculated values
-    // if any of them are > MAX_ERR, function reutrns false
-    bool is_same = true;
-    for(int chan = 0; is_same && chan < pool_key->c; chan++){
-        for(int i = 0; is_same && i < pool_key->m; i++){
-            for(int j = 0; is_same && j < pool_key->n; j++){
-                // double diff = fabs(pool_key->weights[i][j][chan] - pool_calc->weights[i][j][chan]) / fabs(pool_key->weights[i][j][chan]);
-                double w1 = get_weight(pool_key, chan, i, j);
-                double w2 = get_weight(pool_calc, chan, i, j);
-                double diff = fabs(w1 - w2) / fabs(w1);
-                is_same &= (diff < MAX_ERR);
-            }
-        }
-    }
+    // calculate the error between the calculation and the key
+    bool is_same = is_valid_err(pool_key, pool_calc, MAX_ERR);
     
     // mem cleanup
     destroy_layer(mat);
@@ -154,31 +207,15 @@ static bool run_test_conv(const char* f_name, const int padding){
     Layer* conv_calc;
     
     make_convolution(mat, ker, padding, &conv_calc);
-    // printf("input shape: (%d, %d, %d)\n output shape: (%d, %d. %d)\n", mat->m, mat->n, mat->c, conv_calc->m, conv_calc->n, conv_calc->c)
-    // output for debugging when -D DEBUGGING is compiled
     
     DBG_PRINTF("\n");
     DBG_PRINTF("\nkey convolution: \n");
     DBG_PRINT_LAYER(conv_key, 0);
     DBG_PRINTF("calculated convolution: \n");
     DBG_PRINT_LAYER(conv_calc, 0);
-    // DBG_PRINT_LAYER(conv_calc, 1);
-    // DBG_PRINT_LAYER(conv_calc, 2);
 
-    // finds the % difference between all the expected and calculated values
-    // if any of them are > MAX_ERR, function reutrns false
-    bool is_same = true;
-    for(int chan = 0; is_same && chan < conv_key->c; chan++){
-        for(int i = 0; is_same && i < conv_key->m; i++){
-            for(int j = 0; is_same && j < conv_key->n; j++){
-                // double diff = fabs(conv_key->weights[i][j][chan] - conv_calc->weights[i][j][chan]) / fabs(conv_key->weights[i][j][chan]);
-                double w1 = get_weight(conv_key, chan, i, j);
-                double w2 = get_weight(conv_calc, chan, i, j);
-                double diff = fabs(w1 - w2) / fabs(w1);
-                is_same &= (diff < MAX_ERR);
-            }
-        }
-    }
+    // calculate the error between the calculation and the key
+    bool is_same = is_valid_err(conv_key, conv_calc, MAX_ERR);
     
     // mem cleanup
     destroy_layer(ker);

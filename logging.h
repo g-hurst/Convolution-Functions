@@ -44,9 +44,9 @@
         do {                                                    \
             DBG_PRINTF("[");                                    \
             for(int dbg_i = 0; dbg_i < (dbg_sz) - 1; dbg_i++){  \
-                DBG_PRINTF("%3d, ", (dbg_arr)[dbg_i]);           \
+                DBG_PRINTF("%3lf, ", (dbg_arr)[dbg_i]);           \
             }                                                   \
-            DBG_PRINTF("%3d]\n", (dbg_arr)[(dbg_sz) - 1]);       \
+            DBG_PRINTF("%3lf]\n", (dbg_arr)[(dbg_sz) - 1]);       \
         } while(false)
 
         #define DBG_PRINT_LAYER(dbg_grid, dbg_c)                     \

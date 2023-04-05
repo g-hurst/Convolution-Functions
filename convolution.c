@@ -8,14 +8,14 @@ double get_weight(Layer* l, int c, int m, int n){
     if(!l)  return 0;
     int invalid = (m < 0 || n < 0 || c < 0) || (m > l->m || n > l->n || c > l->c);
     if(invalid) return 0;
-    return l->weights[(c * l->m * l->n) + (n * l->m) + m];
+    return l->weights[(c * l->m * l->n) + (m * l->n) + n];
 }
 
 void set_weight(double val, Layer* l, int c, int m, int n) {
     if(!l)  return;
     int invalid = (m < 0 || n < 0 || c < 0) || (m > l->m || n > l->n || c > l->c);
     if(invalid) return;
-    l->weights[(c * l->m * l->n) + (n * l->m) + m] = val;
+    l->weights[(c * l->m * l->n) + (m * l->n) + n] = val;
 }
 
 Layer* make_layer(int m, int n, int c){
@@ -108,6 +108,18 @@ void make_convolution(Layer* input, Layer* kernel, int padding, Layer** final_ou
         }
     }
     *final_out =  output;
+}
+
+void make_fully_connected(Layer* input, Layer* w_and_b, Layer** final_out){
+    Layer* output = make_layer(w_and_b->n / 2, 1, 1);
+    for (int i = 0; i < w_and_b->n; i += 2){
+        for(int j = 0; j < input->m * input->n * input->c; j++){
+            output->weights[i/2] += input->weights[j] * get_weight(w_and_b, 0, j, i);
+            output->weights[i/2] += get_weight(w_and_b, 0, j, i+1);
+            // printf("out += %-.3lf * %-.3lf + %-.3lf\n", input->weights[j], get_weight(w_and_b, 0, j, i), get_weight(w_and_b, 0, j, i+1));
+        }
+    }
+    *final_out = output;
 }
 
 void destroy_layer(Layer *layer){
