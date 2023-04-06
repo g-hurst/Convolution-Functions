@@ -130,9 +130,9 @@ static bool run_test_fullconn(const char* f_name){
     DBG_PRINT_LAYER(w_and_b, 0);
 
     Layer* fullconn_key  = json_to_layer(data["output"]);
-    Layer* fullconn_calc;
+    Layer* fullconn_calc = make_layer(w_and_b->n / 2, 1, 1);;
     
-    make_fully_connected(mat, w_and_b, &fullconn_calc);
+    make_fully_connected(mat, w_and_b, fullconn_calc);
     
     DBG_PRINTF("\n");
     DBG_PRINTF("\nkey fully connected: \n");
@@ -168,9 +168,11 @@ static bool run_test_maxpool(const char* f_name){
     int stride        = data["pool"]["stride"].asInt();
 
     Layer* pool_key  = json_to_layer(data["output"]);
-    Layer* pool_calc;
+    Layer* pool_calc = make_layer((mat->m - window_size_m) / stride + 1, 
+                                    (mat->n - window_size_n) / stride + 1,
+                                    mat->c);;
     
-    make_max_pooling(mat, window_size_m, window_size_n, stride, &pool_calc);
+    make_max_pooling(mat, window_size_m, window_size_n, stride, pool_calc);
     
     DBG_PRINTF("\n");
     DBG_PRINTF("\nkey pool: \n");
@@ -204,9 +206,11 @@ static bool run_test_conv(const char* f_name, const int padding){
     DBG_PRINT_LAYER(ker, 0);
 
     Layer* conv_key  = json_to_layer(data["convolution"]);
-    Layer* conv_calc;
-    
-    make_convolution(mat, ker, padding, &conv_calc);
+    Layer* conv_calc = make_layer(mat->m - ker->m + 1 + 2 * padding, 
+                                mat->n - ker->n + 1 + 2 * padding,
+                                mat->c);;
+
+    make_convolution(mat, ker, padding, conv_calc);
     
     DBG_PRINTF("\n");
     DBG_PRINTF("\nkey convolution: \n");

@@ -66,17 +66,13 @@ static double get_max(Layer* input, int window_size_m, int window_size_n, int c,
     return max;   
 }
 
-void make_max_pooling(Layer* input, int window_size_m, int window_size_n, int stride, Layer** final_out) {
+void make_max_pooling(Layer* input, int window_size_m, int window_size_n, int stride, Layer* output) {
     /*
     Takes an input layer, window shape, and stride. 
     Max pooling is then performed to create the final_out layer.
     NOTE: this assumes the window shape and stride will match the input 
           (this is NOT memory safe if it does not!!!!)
     */
-    Layer* output = make_layer((input->m - window_size_m) / stride + 1, 
-                               (input->n - window_size_n) / stride + 1,
-                               input->c);
-
     for(int i = 0; i < output->m; i++){
         for(int j = 0; j < output->n; j++) {
             for(int k = 0; k < output->c; k++) {
@@ -85,20 +81,14 @@ void make_max_pooling(Layer* input, int window_size_m, int window_size_n, int st
             }
         }
     }
-
-    *final_out =  output;
 }
 
-void make_convolution(Layer* input, Layer* kernel, int padding, Layer** final_out){ 
+void make_convolution(Layer* input, Layer* kernel, int padding, Layer* output){ 
     /*
     takes an input layer and a kernel and then convolutes it 
     into a output layer. 
     NOTE: this assumes the kernal to only have one channel
     */
-    Layer* output = make_layer(input->m - kernel->m + 1 + 2 * padding, 
-                               input->n - kernel->n + 1 + 2 * padding,
-                               input->c);
-
     for(int i = -padding; i < output->m + padding; i++){
         for(int j = -padding; j < output->n + padding; j++) {
             for(int k = -padding; k < output->c + padding; k++) {
@@ -107,19 +97,15 @@ void make_convolution(Layer* input, Layer* kernel, int padding, Layer** final_ou
             }
         }
     }
-    *final_out =  output;
 }
 
-void make_fully_connected(Layer* input, Layer* w_and_b, Layer** final_out){
-    Layer* output = make_layer(w_and_b->n / 2, 1, 1);
+void make_fully_connected(Layer* input, Layer* w_and_b, Layer* output){
     for (int i = 0; i < w_and_b->n; i += 2){
         for(int j = 0; j < input->m * input->n * input->c; j++){
             output->weights[i/2] += input->weights[j] * get_weight(w_and_b, 0, j, i);
             output->weights[i/2] += get_weight(w_and_b, 0, j, i+1);
-            // printf("out += %-.3lf * %-.3lf + %-.3lf\n", input->weights[j], get_weight(w_and_b, 0, j, i), get_weight(w_and_b, 0, j, i+1));
         }
     }
-    *final_out = output;
 }
 
 void destroy_layer(Layer *layer){

@@ -37,7 +37,6 @@ def write_test_maxpool(f_name, mat, pool_size, stride):
     mat = tf.reshape(mat, [1, mat.shape[0], mat.shape[1], mat.shape[2], 1])
     pool = MaxPool3D(pool_size=(1, pool_size[0], pool_size[1]), strides=(1, stride, stride), padding='valid')
     
-    
     output = pool(mat).numpy()
     output = np.reshape(output, [og_shape[0], 
                                  (og_shape[1] - pool_size[0]) // stride + 1, 
