@@ -89,10 +89,11 @@ void make_convolution(Layer* input, Layer* kernel, int padding, Layer* output){
     into a output layer. 
     NOTE: this assumes the kernal to only have one channel
     */
-    for(int i = -padding; i < output->m + padding; i++){
-        for(int j = -padding; j < output->n + padding; j++) {
-            for(int k = -padding; k < output->c + padding; k++) {
-                double dot = dot_3d(input, kernel, k, i, j);
+    double dot;
+    for(int i = 0; i < output->m; i++){
+        for(int j = 0; j < output->n; j++) {
+            for(int k = 0; k < output->c; k++) {
+                dot = dot_3d(input, kernel, k, i - padding, j - padding);
                 set_weight(dot, output, k, i, j);
             }
         }

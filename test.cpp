@@ -7,10 +7,10 @@
 #include "convolution.h"
 #include "logging.h"
 
-#define TESTS_2D 6
-#define TESTS_3D 6
-#define TESTS_MAXPOOL 2
-#define TESTS_FULLCONN 2
+#define TESTS_2D 6        // MAX: 6
+#define TESTS_3D 7        // MAX: 7
+#define TESTS_MAXPOOL 3   // MAX: 3
+#define TESTS_FULLCONN 2  // MAX: 2
 
 #define MAX_ERR 0.01 // value for the max error between any expected and calcualted convolution value
 
@@ -22,55 +22,64 @@ int main(){
     system("python3 generate_tests.py"); // runs the py file to generate the test cases
 
     // test cases for 2d convolution
-    const char* f_names_2d[] = {"keys/test_conv_0.json", "keys/test_conv_1.json", "keys/test_conv_2.json",
-                                        "keys/test_conv_3.json", "keys/test_conv_4.json", "keys/test_conv_5.json"};
-    LOG_BLUE("Running test cases for 2d convolution: \n");
-    for (int i = 0; i < TESTS_2D; i++) {
-        if( run_test_conv(f_names_2d[i], 0)) {
-            LOG_GREEN("Test %02d Passed: %s\n", i, f_names_2d[i]);
-        }
-        else{
-            LOG_RED("Test %02d Failed: %s\n", i, f_names_2d[i]);
+    if(TESTS_2D){
+        const char* f_names_2d[] = {"keys/test_conv_0.json", "keys/test_conv_1.json", "keys/test_conv_2.json",
+                                            "keys/test_conv_3.json", "keys/test_conv_4.json", "keys/test_conv_5.json"};
+        LOG_BLUE("Running test cases for 2d convolution: \n");
+        for (int i = 0; i < TESTS_2D; i++) {
+            if( run_test_conv(f_names_2d[i], 0)) {
+                LOG_GREEN("Test %02d Passed: %s\n", i, f_names_2d[i]);
+            }
+            else{
+                LOG_RED("Test %02d Failed: %s\n", i, f_names_2d[i]);
+            }
         }
     }
 
     // test cases for 3d convolution
-    LOG_BLUE("Running test cases for 3d convolution: \n");
-    const char* f_names_3d[] = {"keys/test_conv3D_0.json", "keys/test_conv3D_1.json", "keys/test_conv3D_2.json",
-                                        "keys/test_conv3D_3.json", "keys/test_conv3D_4.json", "keys/test_conv3D_5.json"};
-    for (int i = 0; i < TESTS_3D; i++) {
-        bool success = (i < 6) ? run_test_conv(f_names_3d[i], 0) : run_test_conv(f_names_3d[i], 1);
-        if( success ) {
-            LOG_GREEN("Test %02d Passed: %s\n", i, f_names_3d[i]);
-        }
-        else{
-            LOG_RED("Test %02d Failed: %s\n", i, f_names_3d[i]);
+    if (TESTS_3D) {
+        LOG_BLUE("Running test cases for 3d convolution: \n");
+        const char* f_names_3d[] = {"keys/test_conv3D_0.json", "keys/test_conv3D_1.json", "keys/test_conv3D_2.json",
+                                            "keys/test_conv3D_3.json", "keys/test_conv3D_4.json", "keys/test_conv3D_5.json",
+                                            "keys/test_conv3D_6.json"};
+        for (int i = 0; i < TESTS_3D; i++) {
+            bool success = (i < 6) ? run_test_conv(f_names_3d[i], 0) : run_test_conv(f_names_3d[i], 0); // meant for changing padding in the future
+            if( success ) {
+                LOG_GREEN("Test %02d Passed: %s\n", i, f_names_3d[i]);
+            }
+            else{
+                LOG_RED("Test %02d Failed: %s\n", i, f_names_3d[i]);
+            }
         }
     }
 
     // test cases for max pooling
-    LOG_BLUE("Running test cases for max pooling: \n");
-    const char* f_names_maxpool[] = {"keys/test_maxpool_0.json", "keys/test_maxpool_alexnet_1.json", "keys/test_maxpool_alexnet_3.json"};
+    if(TESTS_MAXPOOL) {
+        LOG_BLUE("Running test cases for max pooling: \n");
+        const char* f_names_maxpool[] = {"keys/test_maxpool_0.json", "keys/test_maxpool_alexnet_1.json", "keys/test_maxpool_alexnet_3.json"};
 
-    for (int i = 0; i < TESTS_MAXPOOL; i++) {
-        if( run_test_maxpool(f_names_maxpool[i])) {
-            LOG_GREEN("Test %02d Passed: %s\n", i, f_names_maxpool[i]);
-        }
-        else{
-            LOG_RED("Test %02d Failed: %s\n", i, f_names_maxpool[i]);
+        for (int i = 0; i < TESTS_MAXPOOL; i++) {
+            if( run_test_maxpool(f_names_maxpool[i])) {
+                LOG_GREEN("Test %02d Passed: %s\n", i, f_names_maxpool[i]);
+            }
+            else{
+                LOG_RED("Test %02d Failed: %s\n", i, f_names_maxpool[i]);
+            }
         }
     }
 
     // test cases for fully connected layer
-    LOG_BLUE("Running test cases for fully connected: \n");
-    const char* f_names_fullconn[] = {"keys/test_fullconn_0.json", "keys/test_fullconn_1.json"};
+    if(TESTS_FULLCONN){
+        LOG_BLUE("Running test cases for fully connected: \n");
+        const char* f_names_fullconn[] = {"keys/test_fullconn_0.json", "keys/test_fullconn_1.json"};
 
-    for (int i = 0; i < TESTS_FULLCONN; i++) {
-        if( run_test_fullconn(f_names_fullconn[i])) {
-            LOG_GREEN("Test %02d Passed: %s\n", i, f_names_fullconn[i]);
-        }
-        else{
-            LOG_RED("Test %02d Failed: %s\n", i, f_names_fullconn[i]);
+        for (int i = 0; i < TESTS_FULLCONN; i++) {
+            if( run_test_fullconn(f_names_fullconn[i])) {
+                LOG_GREEN("Test %02d Passed: %s\n", i, f_names_fullconn[i]);
+            }
+            else{
+                LOG_RED("Test %02d Failed: %s\n", i, f_names_fullconn[i]);
+            }
         }
     }
 
@@ -89,7 +98,6 @@ static Layer* json_to_layer(Json::Value mat){
         for(int i = 0; i < m; i++) {
             for(int j = 0; j < n; j++) {
                 set_weight(mat["data"][chan][i][j].asDouble(), layer, chan, i, j);
-                // layer->weights[i][j][chan] = mat["data"][chan][i][j].asDouble();
             }
         }
     }
@@ -204,11 +212,12 @@ static bool run_test_conv(const char* f_name, const int padding){
 
     Layer* ker = json_to_layer(data["kernel"]);
     DBG_PRINT_LAYER(ker, 0);
+    DBG_PRINTF("(%d, %d, %d)\n", ker->c, ker->m, ker->n);
 
     Layer* conv_key  = json_to_layer(data["convolution"]);
     Layer* conv_calc = make_layer(mat->m - ker->m + 1 + 2 * padding, 
                                 mat->n - ker->n + 1 + 2 * padding,
-                                mat->c);
+                                mat->c - ker->c + 1);
 
     make_convolution(mat, ker, padding, conv_calc);
     
@@ -217,6 +226,7 @@ static bool run_test_conv(const char* f_name, const int padding){
     DBG_PRINT_LAYER(conv_key, 0);
     DBG_PRINTF("calculated convolution: \n");
     DBG_PRINT_LAYER(conv_calc, 0);
+    DBG_PRINTF("(%d, %d, %d)\n", conv_calc->c, conv_calc->m, conv_calc->n);
 
     // calculate the error between the calculation and the key
     bool is_same = is_valid_err(conv_key, conv_calc, MAX_ERR);

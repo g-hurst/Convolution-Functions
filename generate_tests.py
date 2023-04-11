@@ -70,7 +70,8 @@ generations_conv = [{'fname':'test_conv_0.json', 'm_size':(1,5,5), 'k_size':(1,2
                     {'fname':'test_conv3D_2.json', 'm_size':(3,100,100), 'k_size':(1,10,10)},
                     {'fname':'test_conv3D_3.json', 'm_size':(3,320,240), 'k_size':(1,5,5)},
                     {'fname':'test_conv3D_4.json', 'm_size':(3,720,576), 'k_size':(1,7,7)},
-                    {'fname':'test_conv3D_5.json', 'm_size':(3,1024,768), 'k_size':(1,15,15)}]
+                    {'fname':'test_conv3D_5.json', 'm_size':(3,1024,768), 'k_size':(1,15,15)},
+                    {'fname':'test_conv3D_6.json', 'm_size':(384,15,15), 'k_size':(384,3,3)}]
 
 generations_maxpool = [{'fname':'test_maxpool_0.json', 'm_size':(1,13,13),   'w_size':(3,3), 'stride':2},
                        {'fname':'test_maxpool_alexnet_3.json', 'm_size':(256,13,13), 'w_size':(3,3), 'stride':2},
