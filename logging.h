@@ -21,16 +21,16 @@
         } while(false)  
 
     #define LOG_IS_FILE_OUT isatty(STDOUT_FILENO) 
-    #define _LOG_OUT(...) fprintf(LOG_OUT, __VA_ARGS__)
+    #define _LOG_OUT(...) printf(__VA_ARGS__)
     #define _LOG_COL(log_col, ...)                     \
-            do{                                      \
-                if (LOG_IS_FILE_OUT) {               \
-                    _LOG_OUT(log_col __VA_ARGS__);\
-                    _LOG_OUT(ANSI_RESET);	        \
-                }                                   \
-                else{                               \
-                    _LOG_OUT(__VA_ARGS__);          \
-                }                                   \
+            do{                                        \
+                if (LOG_IS_FILE_OUT) {                 \
+                    _LOG_OUT(log_col __VA_ARGS__);     \
+                    _LOG_OUT(ANSI_RESET);	           \
+                }                                      \
+                else{                                  \
+                    _LOG_OUT(__VA_ARGS__);             \
+                }                                      \
             }while(false)
     #define LOG_ERR(...)   _LOG_COL(ANSI_RED, __VA_ARGS__)
     #define LOG_RED(...)   _LOG_COL(ANSI_RED, __VA_ARGS__)
@@ -39,29 +39,71 @@
 
     //_______________________________DEBUGGING__________________________
     #ifdef DEBUGGING
-        #define DBG_PRINTF(...) fprintf(stdout, __VA_ARGS__) 
-        #define DBG_PRINT_ARR(dbg_arr, dbg_sz)                  \
-        do {                                                    \
-            DBG_PRINTF("[");                                    \
-            for(int dbg_i = 0; dbg_i < (dbg_sz) - 1; dbg_i++){  \
+        #define DBG_PRINTF(...) printf(__VA_ARGS__) 
+        #define DBG_PRINT_ARR(dbg_arr, dbg_sz)                    \
+        do {                                                      \
+            DBG_PRINTF("[");                                      \
+            for(int dbg_i = 0; dbg_i < (dbg_sz) - 1; dbg_i++){    \
                 DBG_PRINTF("%3lf, ", (dbg_arr)[dbg_i]);           \
-            }                                                   \
+            }                                                     \
             DBG_PRINTF("%3lf]\n", (dbg_arr)[(dbg_sz) - 1]);       \
         } while(false)
 
-        #define DBG_PRINT_LAYER(dbg_grid, dbg_c)                     \
-        do {                                                         \
-            for(int dbg_j = 0; dbg_j < (dbg_grid)->m; dbg_j++){       \
-                DBG_PRINTF("[");                                    \
-                for(int dbg_i = 0; dbg_i < (dbg_grid)->n - 1; dbg_i++){        \
-                    DBG_PRINTF("%6.3f, ", get_weight(dbg_grid, dbg_c, dbg_j, dbg_i)); \
-                }                                                         \
-                DBG_PRINTF("%8.3f]\n", get_weight(dbg_grid, dbg_c, dbg_j, (dbg_grid)->n - 1));       \
-            }                                                             \
+        #define DBG_PRINT_ARR_SML(dbg_arr, dbg_sz)                         \
+        do {                                                               \
+            DBG_PRINTF("[");                                               \
+            for(int dbg_i = 0; dbg_i < 3; dbg_i++){                        \
+                DBG_PRINTF("%3lf, ", (dbg_arr)[dbg_i]);                    \
+            }                                                              \
+            DBG_PRINTF("  ...  ");                                         \
+            for(int dbg_i = (dbg_sz) - 3; dbg_i < (dbg_sz) - 1; dbg_i++){  \
+                DBG_PRINTF("%3lf, ", (dbg_arr)[dbg_i]);                    \
+            }                                                              \
+            DBG_PRINTF("%3lf]\n", (dbg_arr)[(dbg_sz) - 1]);                \
+        } while(false)                                 
+
+        #define DBG_PRINT_LAYER(dbg_grid, dbg_c)                                               \
+        do {                                                                                   \
+            for(int dbg_j = 0; dbg_j < (dbg_grid)->m; dbg_j++){                                \
+                DBG_PRINTF("[");                                                               \
+                for(int dbg_i = 0; dbg_i < (dbg_grid)->n - 1; dbg_i++){                        \
+                    DBG_PRINTF("%6.3f, ", get_weight(dbg_grid, dbg_c, dbg_j, dbg_i));          \
+                }                                                                              \
+                DBG_PRINTF("%8.3f]\n", get_weight(dbg_grid, dbg_c, dbg_j, (dbg_grid)->n - 1)); \
+            }                                                                                  \
+        } while(false)
+
+        #define DBG_PRINT_LAYER_SML(dbg_grid, dbg_c)                                            \
+        do {                                                                                    \
+            for(int dbg_j = 0; dbg_j < 3; dbg_j++){                                             \
+                DBG_PRINTF("[");                                                                \
+                for(int dbg_i = 0; dbg_i < 3; dbg_i++){                                         \
+                    DBG_PRINTF("%6.3f, ", get_weight(dbg_grid, dbg_c, dbg_j, dbg_i));           \
+                }                                                                               \
+                DBG_PRINTF("  ...  ");                                                          \
+                for(int dbg_i = (dbg_grid)->n - 3; dbg_i < (dbg_grid)->n - 1; dbg_i++){         \
+                    DBG_PRINTF("%6.3f, ", get_weight(dbg_grid, dbg_c, dbg_j, dbg_i));           \
+                }                                                                               \
+                DBG_PRINTF("%8.3f]\n", get_weight(dbg_grid, dbg_c, dbg_j, (dbg_grid)->n - 1));  \
+            }                                                                                   \
+            DBG_PRINTF("           ...............................           \n");              \
+            for(int dbg_j = (dbg_grid)->m - 3; dbg_j < (dbg_grid)->m; dbg_j++){                 \
+                DBG_PRINTF("[");                                                                \
+                for(int dbg_i = 0; dbg_i < 3; dbg_i++){                                         \
+                    DBG_PRINTF("%6.3f, ", get_weight(dbg_grid, dbg_c, dbg_j, dbg_i));           \
+                }                                                                               \
+                DBG_PRINTF("  ...  ");                                                          \
+                for(int dbg_i = (dbg_grid)->n - 3; dbg_i < (dbg_grid)->n - 1; dbg_i++){         \
+                    DBG_PRINTF("%6.3f, ", get_weight(dbg_grid, dbg_c, dbg_j, dbg_i));           \
+                }                                                                               \
+                DBG_PRINTF("%8.3f]\n", get_weight(dbg_grid, dbg_c, dbg_j, (dbg_grid)->n - 1));  \
+            }                                                                                   \
         } while(false)
     #else
         #define DBG_PRINTF(...)
         #define DBG_PRINT_ARR(dbg_arr, dbg_sz)
+        #define DBG_PRINT_ARR_SML(dbg_arr, dbg_sz)
         #define DBG_PRINT_LAYER(dbg_grid, dbg_c)
+        #define DBG_PRINT_LAYER_SML(dbg_grid, dbg_c)
     #endif
 #endif

@@ -131,11 +131,11 @@ static bool run_test_fullconn(const char* f_name){
 
     // read from JSON and convert to layer structure
     Layer* mat = json_to_layer(data["matrix"]);
-    DBG_PRINT_LAYER(mat, 0);
-    DBG_PRINT_ARR(mat->weights, mat->m * mat->n * mat->c);
+    DBG_PRINT_LAYER_SML(mat, 0);
+    DBG_PRINT_ARR_SML(mat->weights, mat->m * mat->n * mat->c);
 
     Layer* w_and_b = json_to_layer(data["w_and_b"]);
-    DBG_PRINT_LAYER(w_and_b, 0);
+    DBG_PRINT_LAYER_SML(w_and_b, 0);
 
     Layer* fullconn_key  = json_to_layer(data["output"]);
     Layer* fullconn_calc = make_layer(w_and_b->n / 2, 1, 1);
@@ -144,9 +144,9 @@ static bool run_test_fullconn(const char* f_name){
     
     DBG_PRINTF("\n");
     DBG_PRINTF("\nkey fully connected: \n");
-    DBG_PRINT_LAYER(fullconn_key, 0);
+    DBG_PRINT_LAYER_SML(fullconn_key, 0);
     DBG_PRINTF("calculated fully connected: \n");
-    DBG_PRINT_LAYER(fullconn_calc, 0);
+    DBG_PRINT_LAYER_SML(fullconn_calc, 0);
 
     // calculate the error between the calculation and the key
     bool is_same = is_valid_err(fullconn_key, fullconn_calc, MAX_ERR);
@@ -169,7 +169,7 @@ static bool run_test_maxpool(const char* f_name){
 
     // read from JSON and convert to layer structure
     Layer* mat = json_to_layer(data["matrix"]);
-    DBG_PRINT_LAYER(mat, 0);
+    DBG_PRINT_LAYER_SML(mat, 0);
 
     int window_size_m = data["pool"]["shape"][0].asInt();
     int window_size_n = data["pool"]["shape"][0].asInt();
@@ -184,9 +184,9 @@ static bool run_test_maxpool(const char* f_name){
     
     DBG_PRINTF("\n");
     DBG_PRINTF("\nkey pool: \n");
-    DBG_PRINT_LAYER(pool_key, 0);
+    DBG_PRINT_LAYER_SML(pool_key, 0);
     DBG_PRINTF("calculated pool: \n");
-    DBG_PRINT_LAYER(pool_calc, 0);
+    DBG_PRINT_LAYER_SML(pool_calc, 0);
 
     // calculate the error between the calculation and the key
     bool is_same = is_valid_err(pool_key, pool_calc, MAX_ERR);
@@ -208,10 +208,10 @@ static bool run_test_conv(const char* f_name, const int padding){
 
     // read from JSON and convert to layer structure
     Layer* mat = json_to_layer(data["matrix"]);
-    DBG_PRINT_LAYER(mat, 0);
+    DBG_PRINT_LAYER_SML(mat, 0);
 
     Layer* ker = json_to_layer(data["kernel"]);
-    DBG_PRINT_LAYER(ker, 0);
+    DBG_PRINT_LAYER_SML(ker, 0);
     DBG_PRINTF("(%d, %d, %d)\n", ker->c, ker->m, ker->n);
 
     Layer* conv_key  = json_to_layer(data["convolution"]);
@@ -223,9 +223,9 @@ static bool run_test_conv(const char* f_name, const int padding){
     
     DBG_PRINTF("\n");
     DBG_PRINTF("\nkey convolution: \n");
-    DBG_PRINT_LAYER(conv_key, 0);
+    DBG_PRINT_LAYER_SML(conv_key, 0);
     DBG_PRINTF("calculated convolution: \n");
-    DBG_PRINT_LAYER(conv_calc, 0);
+    DBG_PRINT_LAYER_SML(conv_calc, 0);
     DBG_PRINTF("(%d, %d, %d)\n", conv_calc->c, conv_calc->m, conv_calc->n);
 
     // calculate the error between the calculation and the key
