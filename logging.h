@@ -56,7 +56,7 @@
                 DBG_PRINTF("%3lf, ", (dbg_arr)[dbg_i]);                    \
             }                                                              \
             DBG_PRINTF("  ...  ");                                         \
-            for(int dbg_i = (dbg_sz) - 3; dbg_i < (dbg_sz) - 1; dbg_i++){  \
+            for(int dbg_i = (dbg_sz) - 4; dbg_i < (dbg_sz) - 2; dbg_i++){  \
                 DBG_PRINTF("%3lf, ", (dbg_arr)[dbg_i]);                    \
             }                                                              \
             DBG_PRINTF("%3lf]\n", (dbg_arr)[(dbg_sz) - 1]);                \
@@ -81,7 +81,7 @@
                     DBG_PRINTF("%6.3f, ", get_weight(dbg_grid, dbg_c, dbg_j, dbg_i));           \
                 }                                                                               \
                 DBG_PRINTF("  ...  ");                                                          \
-                for(int dbg_i = (dbg_grid)->n - 3; dbg_i < (dbg_grid)->n - 1; dbg_i++){         \
+                for(int dbg_i = (dbg_grid)->n - 4; dbg_i < (dbg_grid)->n - 2; dbg_i++){         \
                     DBG_PRINTF("%6.3f, ", get_weight(dbg_grid, dbg_c, dbg_j, dbg_i));           \
                 }                                                                               \
                 DBG_PRINTF("%8.3f]\n", get_weight(dbg_grid, dbg_c, dbg_j, (dbg_grid)->n - 1));  \
@@ -93,7 +93,7 @@
                     DBG_PRINTF("%6.3f, ", get_weight(dbg_grid, dbg_c, dbg_j, dbg_i));           \
                 }                                                                               \
                 DBG_PRINTF("  ...  ");                                                          \
-                for(int dbg_i = (dbg_grid)->n - 3; dbg_i < (dbg_grid)->n - 1; dbg_i++){         \
+                for(int dbg_i = (dbg_grid)->n - 4; dbg_i < (dbg_grid)->n - 2; dbg_i++){         \
                     DBG_PRINTF("%6.3f, ", get_weight(dbg_grid, dbg_c, dbg_j, dbg_i));           \
                 }                                                                               \
                 DBG_PRINTF("%8.3f]\n", get_weight(dbg_grid, dbg_c, dbg_j, (dbg_grid)->n - 1));  \
